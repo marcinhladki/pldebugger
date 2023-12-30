@@ -4,7 +4,13 @@
 ARG BASE_IMAGE=latest
 FROM postgres:${BASE_IMAGE}
 
-# SET ENV
+ENV POSTGRES_HOST_AUTH_METHOD="trust"
+RUN localedef -i pl_PL -c -f UTF-8 -A /usr/share/locale/locale.alias pl_PL.UTF-8
+ENV LANG pl_PL.utf8
+ENV LC_MESSAGES POSIX
+RUN update-locale --reset
+
+## SET ENV
 ARG TAG
 ENV PG_LIB=postgresql-server-dev-${TAG}
 ENV PG_BRANCH=REL_${TAG}_STABLE
@@ -19,7 +25,7 @@ RUN apt --yes update \
     && git clone --progress -b $PG_BRANCH --single-branch https://github.com/postgres/postgres.git \
     && cd postgres \
     && ./configure \
-    && cd /usr/src/postgres/contrib \ 
+    && cd /usr/src/postgres/contrib \
     && git clone -b $PLUGIN_BRANCH --single-branch https://github.com/ng-galien/pldebugger.git \
     && cd pldebugger \
     && make clean && make USE_PGXS=1 && make USE_PGXS=1 install \
